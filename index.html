@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image upload test</title>
+    <style>
+      html {
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        margin: 1em;
+      }
+      input {
+        font: inherit;
+      }
+      h2 {
+        margin-top: 3em;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      tr:nth-child(odd) {
+        background-color: #eee;
+      }
+      th,
+      td {
+        border: 1px solid;
+        vertical-align: top;
+        padding: 0.5em;
+      }
+      img {
+        max-width: 300px;
+        max-height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Image upload test</h1>
+    <script>
+      const KiB = 1024;
+      const MiB = 1048576;
+
+      function printFileSize(fileSize) {
+        const [divided, unit] =
+          fileSize >= MiB ? [fileSize / MiB, "MiB"] : [fileSize / KiB, "KiB"];
+        const string = toFixed(divided).padStart(4, " ");
+        return `${string}\u00a0${unit}`;
+      }
+
+      function toFixed(n) {
+        const s1 = n.toFixed(2);
+        if (s1.length <= 4) {
+          return s1;
+        }
+
+        const s2 = n.toFixed(1);
+        if (s2.length <= 4) {
+          return s2;
+        }
+
+        return n.toFixed(0);
+      }
+
+      const variations = [
+        "",
+        "image/*",
+        "image/jpeg",
+        "image/png",
+        "image/jpeg,image/png",
+        ".heic",
+        ".heif",
+        ".heic,.heif",
+        "image/jpeg,.heic,.heif",
+      ];
+
+      const properties = ["name", "type", "size", "lastModified", "preview"];
+
+      for (const accept of variations) {
+        for (const multiple of [false, true]) {
+          const h2 = document.createElement("h2");
+          h2.textContent = multiple
+            ? `accept="${accept}" multiple`
+            : `accept="${accept}"`;
+
+          const table = document.createElement("table");
+          const tbody = document.createElement("tbody");
+          const trHead = document.createElement("tr");
+          for (const name of properties) {
+            const th = document.createElement("th");
+            th.textContent = name;
+            trHead.append(th);
+          }
+          tbody.append(trHead);
+          table.append(tbody);
+          table.hidden = true;
+
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = accept;
+          input.multiple = multiple;
+          input.addEventListener("input", (event) => {
+            table.hidden = false;
+            for (const file of input.files) {
+              const tr = document.createElement("tr");
+              for (const property of properties) {
+                const td = document.createElement("td");
+                switch (property) {
+                  case "lastModified":
+                    td.textContent = new Date(
+                      file.lastModified
+                    ).toLocaleString();
+                    break;
+
+                  case "size":
+                    td.textContent = printFileSize(file.size);
+                    break;
+
+                  case "preview": {
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(file);
+                    td.append(img);
+                    break;
+                  }
+
+                  default:
+                    td.textContent = file[property];
+                }
+                tr.append(td);
+              }
+              tbody.append(tr);
+            }
+          });
+          const p = document.createElement("p");
+          p.append(input);
+
+          document.body.append(h2, p, table);
+        }
+      }
+    </script>
+  </body>
+</html>
