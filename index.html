@@ -17,6 +17,8 @@
       }
       h2 {
         margin-top: 3em;
+        word-break: break-word;
+        font-size: 1.3em;
       }
       table {
         border-collapse: collapse;
@@ -29,6 +31,7 @@
         border: 1px solid;
         vertical-align: top;
         padding: 0.5em;
+        text-align: left;
       }
       img {
         max-width: 300px;
@@ -86,13 +89,6 @@
 
           const table = document.createElement("table");
           const tbody = document.createElement("tbody");
-          const trHead = document.createElement("tr");
-          for (const name of properties) {
-            const th = document.createElement("th");
-            th.textContent = name;
-            trHead.append(th);
-          }
-          tbody.append(trHead);
           table.append(tbody);
           table.hidden = true;
 
@@ -103,9 +99,11 @@
           input.addEventListener("input", (event) => {
             table.hidden = false;
             for (const file of input.files) {
-              const tr = document.createElement("tr");
               for (const property of properties) {
+                const tr = document.createElement("tr");
+                const th = document.createElement("th");
                 const td = document.createElement("td");
+                th.textContent = property;
                 switch (property) {
                   case "lastModified":
                     td.textContent = new Date(
@@ -127,9 +125,9 @@
                   default:
                     td.textContent = file[property];
                 }
-                tr.append(td);
+                tr.append(th, td);
+                tbody.append(tr);
               }
-              tbody.append(tr);
             }
           });
           const p = document.createElement("p");
